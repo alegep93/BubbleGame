@@ -1,12 +1,12 @@
 package it.bubble.game.client;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -18,18 +18,33 @@ public class BubbleGame implements EntryPoint {
 	
 	@Override
 	public void onModuleLoad() {
-		List<Bubble> bubbles = new ArrayList<>();
-		Board board = new Board();
+		
+		//Consente di comunicare in modo asincrono con il Server
+		GreetingServiceAsync serv = GWT.create(GreetingService.class);
+		serv.salvaPunteggio("Alessandro", 1000, new AsyncCallback<Void>() {
+			
+			@Override
+			public void onSuccess(Void result) {
+				
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				
+			}
+		});
+		
+		int score = 0;
+		int vite = 10;
+		SimpleEventBus bus = new SimpleEventBus();
+		Board board = new Board(bus);
 
-		for(int i=0; i<10; i++) {	
-			Bubble bubble = new Bubble((int)(Math.random() * 55), (int)(Math.random() * 1720), -100);
-
-			bubble.addClickHandler(new BubbleClickHandler(bubble,bubbles,board));
-			bubbles.add(bubble);
-		}
-
+		ScoreBoard sb = new ScoreBoard(bus);
+		sb.setScore(score);
+		sb.setVite(vite);
+		
 		DockLayoutPanel dlp = new DockLayoutPanel(Unit.PX);
-		dlp.addNorth(new HTML(), 100);
+		dlp.addNorth(sb, 100);
 		dlp.addSouth(new HTML(), 100);
 		dlp.addEast(new HTML(), 100);
 		dlp.addWest(new HTML(), 100);
@@ -37,20 +52,12 @@ public class BubbleGame implements EntryPoint {
 		dlp.add(board);
 
 		RootLayoutPanel.get().add(dlp);
-		
-		//Agiungo le bubble alla Board
-		for(Bubble b : bubbles) {
-			board.add(b);			
-		}
 
 		//Muove le bubble
 		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 					@Override
 					public boolean execute() {
-						for(Bubble b : bubbles) {
-							//b.moveBy((int)((Math.random() - 0.5 ) * 3), (int)((Math.random() + 1) * 3)); //Movimento più lento e laggoso			
-							b.moveBy(0, (int)(Math.random() + 1));			
-						}
+						board.moveBubbles();
 						return true;
 					}
 				}, 10);
@@ -59,14 +66,16 @@ public class BubbleGame implements EntryPoint {
 		Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
 					@Override
 					public boolean execute() {
-						Bubble bubble = new Bubble((int)(Math.random() * 55), (int)(Math.random() * 1720), -100);
+						int dimensione = (int)((Math.random() * 80) + 20);
+						int posX = (int)(Math.random() * (board.getOffsetWidth() - 100));
+						int posY = -100;
 						
-						bubble.addClickHandler(new BubbleClickHandler(bubble,bubbles,board));
-						bubbles.add(bubble);
-						board.add(bubble);
-						
+						if(board.size() < 300) {
+							Bubble bubble = new Bubble(dimensione, posX, posY);
+							board.addBubble(bubble);
+						}
 						return true;
 					}
-				}, 10);
+				}, 80);
 	}
 }

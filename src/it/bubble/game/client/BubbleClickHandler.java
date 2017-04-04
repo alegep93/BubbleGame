@@ -1,25 +1,24 @@
 package it.bubble.game.client;
 
-import java.util.List;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.SimpleEventBus;
 
 public class BubbleClickHandler implements ClickHandler{
 	private Bubble bubble;
-	private List<Bubble> bubbles;
 	private Board board;
+	private SimpleEventBus bus;
 	
-	public BubbleClickHandler(Bubble bubble, List<Bubble> bubbles, Board board) {
+	public BubbleClickHandler(Bubble bubble, Board board, SimpleEventBus bus) {
 		this.bubble = bubble;
-		this.bubbles = bubbles;
 		this.board = board;
+		this.bus = bus;
 	}
 	
 	@Override
 	public void onClick(ClickEvent event) {
-		bubbles.remove(bubble); 
-		board.remove(bubble);
+		board.removeBubble(bubble);
+		bus.fireEvent(new BollaClickataEvent(bubble));
 	}
 	
 }

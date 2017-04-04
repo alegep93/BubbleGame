@@ -1,6 +1,5 @@
 package it.bubble.game.client;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.BorderStyle;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
@@ -10,7 +9,7 @@ public class Bubble extends HTML{
 	private int current_y;
 	private int current_x;
 
-	private String[] colors = { "red", "orange", "magenta", "yellow" };
+	private String[] colors = { "red", "orange", "magenta", "yellow", "black", "lightgreen" };
 
 	public Bubble(int size, int posx, int posy) {
 		String color = colors[(int)(Math.random() * 100) % colors.length];
@@ -33,10 +32,14 @@ public class Bubble extends HTML{
 		this.getElement().getStyle().setBottom(y, Unit.PX);
 		this.getElement().getStyle().setLeft(x, Unit.PX);		
 
-		GWT.log("pos: " + x + "  " + y);
+		//GWT.log("pos: " + x + "  " + y);
 	}
 
 	public void moveBy(int x, int y) {
 		setPos(current_x + x, current_y + y);
+	}
+
+	public int getPositionY() {
+		return current_y;
 	}
 }
